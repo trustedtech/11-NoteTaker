@@ -23,18 +23,30 @@ module.exports = function(app) {
 
     app.delete("/api/notes/:id", function(req, res) {
         //console.log('Executing DELETE request on "/api/notes" route');
-
+        const target = req.params.id;
+        //console.log(target);
+        const revised = db.filter(function(item) {
+            if (item.id != target) { return true; }
+            else { return false; }
+        });
+        rewriteDB(revised);
+        res.json(db);
     });
 }
 
-//Sequence for saving a note and making its data persistent
+//Sequence for publishing a new note 
 function publishNote(note) {
     db.push(note);
-    fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(db),          function(err) { if(err) console.log(err); });
+    rewriteDB(db);
     console.log("Note " + note.id + " published.");
 }
 
-// const target = db.findIndex(function(note) {
+//Rewrites database of saved notes
+function rewriteDB(rwdb) {
+    fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(rwdb),          
+    function(err) { if(err) console.log(err); });
+}
+
 //     return note.id === req.params.id;
 // });
 // db.splice(target, 1);   
